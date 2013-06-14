@@ -1,0 +1,27 @@
+{
+  "name": "pointerrace-server",
+  "version": "0.0.0",
+  "description": "Server component for the pointerrace game.",
+  "main": "server.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/stadthack/pointerrace-server.git"
+  },
+  "keywords": [
+    "game",
+    "multiplayer"
+  ],
+  "author": "Stadthack Kiel 2013",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "gitHead": "87f7ce99152897731597b72e762071bce513b05d",
+  "bugs": {
+    "url": "https://github.com/stadthack/pointerrace-server/issues"
+  },
+  "dependencies": {
+    "socket.io": "~0.9.16"
+  }
+}
