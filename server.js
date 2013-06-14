@@ -1,21 +1,20 @@
-var io = require('socket.io').listen(8080);
+var PORT = 8080;
 
-var players = {};
+var io = require('socket.io').listen(PORT);
+var uuid = require('node-uuid');
 
-io.sockets.on('connection', function (socket) {
-  socket.on('connect', function (data) {
-    players[data.uuid] = data;
-  });
 
-  socket.on('move', function (data) {
-    var player = players[data.uuid];
-    if (player === undefined) {
-      console.error('Player not found.');
-      return;
-    }
+io.configure(function () {
+  io.set('log level', 0);
+});
 
-    console.log('data: ', data);
-    players[data.uuid] = data;
-    socket.broadcast.emit('players-move', players);
+
+io.sockets.on('connection', function onConnection(client) {
+  client.uuid = uuid();
+  client.emit('connected', { uuid: client.uuid });
+  console.log('player ' + client.uuid + ' connected.');
+
+  client.on('disconnect', function onDisconnect() {
+    console.log('player ' + client.uuid + ' disconnected.');
   });
 });

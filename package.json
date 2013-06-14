@@ -22,6 +22,7 @@
     "url": "https://github.com/stadthack/pointerrace-server/issues"
   },
   "dependencies": {
-    "socket.io": "~0.9.16"
+    "socket.io": "~0.9.16",
+    "node-uuid": "~1.4.0"
   }
 }
