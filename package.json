@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "socket.io": "~0.9.16",
-    "node-uuid": "~1.4.0"
+    "sfsm": "0.0.4",
+    "underscore": "~1.4.4"
   }
 }
