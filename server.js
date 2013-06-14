@@ -18,7 +18,7 @@ var gameLoop = {
   _interval: 0,
   _previous: {},
 
-  _loop: function () {
+  _loop: function _loop() {
     var state = {
       players: _.invoke(players, 'serialize'),
       game: game
@@ -26,7 +26,6 @@ var gameLoop = {
 
     if (!_.isEqual(state, this._previous)) {
       io.sockets.emit('serverstate', state);
-      console.log('actually sending');
       this._previous = state;
     }
   },
@@ -49,7 +48,7 @@ var gameLoop = {
   }
 };
 
-var PlayerState = function (player) {
+var PlayerState = function PlayerState(player) {
   this.player = player;
   this.startup();
 };
@@ -110,7 +109,7 @@ io.sockets.on('connection', function onConnection(client) {
     player.state.disconnect();
   });
 
-  client.on('move', function (data) {
+  client.on('move', function onMove(data) {
     player.x = data.x;
     player.y = data.y;
   });
