@@ -11,7 +11,9 @@ var StateMachine = require('sfsm');
 var players = {};
 // Global game state
 var game = {
-  playerCount: 0
+  playerCount: 0,
+  playersInGoal: {},
+  playersInStart: {},
 };
 
 var gameLoop = {
@@ -75,6 +77,7 @@ PlayerState.prototype.ondisconnected = function ondisconnected() {
   io.sockets.emit('player disconnected', this.player.serialize());
 
   game.playerCount -= 1;
+  delete game.playersInStart[this.player.id];
   gameLoop.check();
 };
 
@@ -127,6 +130,22 @@ io.sockets.on('connection', function onConnection(client) {
   });
 
   client.on('game event', function onGameEvent(data) {
-    client.broadcast.emit('game event', data);
+    if (data.eventName === 'enterState') {
+      if (data.args[0] === 'warmup') {
+        game.playersInStart[data.playerId] = true;
+
+        if (Object.keys(game.playersInStart).length === game.playerCount) {
+          _.each(players, function (player) {
+            io.sockets.emit('game event', {
+              eventName: 'enterState',
+              args: ['level'],
+              playerId: player.id
+            });
+          });
+        }
+      }
+    } else {
+      client.broadcast.emit('game event', data);
+    }
   });
 });
