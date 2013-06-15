@@ -1,7 +1,7 @@
 'use strict';
 
 var PORT = 8080;
-var GAMELOOP_FREQUENCY = 1000;
+var GAMELOOP_FREQUENCY = 45;
 
 var _ = require('underscore');
 var io = require('socket.io').listen(PORT);
@@ -72,7 +72,7 @@ PlayerState.prototype.onconnected = function onconnected() {
 PlayerState.prototype.ondisconnected = function ondisconnected() {
   delete players[this.player.id];
   console.log('player ' + this.player.id + ' disconnected and killed.');
-  io.sockets.emit('player disconnected', { player: this.player.serialize() });
+  io.sockets.emit('player disconnected', this.player.serialize());
 
   game.playerCount -= 1;
   gameLoop.check();
@@ -91,16 +91,12 @@ StateMachine.create({
 
 function Player(id) {
   this.id = id;
-  this.x = 0;
-  this.y = 0;
   this.state = new PlayerState(this);
 }
 
 Player.prototype.serialize = function serialize() {
   return {
-    id: this.id,
-    x: this.x,
-    y: this.y
+    id: this.id
   };
 };
 
@@ -110,17 +106,27 @@ io.configure(function () {
 
 
 io.sockets.on('connection', function onConnection(client) {
+  var otherPlayers = _.clone(players);
   var player = players[client.id] = new Player(client.id);
 
-  client.emit('connected', { id: client.id });
+  client.emit('connected', {
+    id: client.id,
+    players: _.invoke(otherPlayers, 'serialize'),
+  });
   player.state.connect();
 
   client.on('disconnect', function onDisconnect() {
     player.state.disconnect();
   });
 
+  client.broadcast.emit('player connected', player.serialize());
+
   client.on('move', function onMove(data) {
     player.x = data.x;
     player.y = data.y;
+  });
+
+  client.on('game event', function onGameEvent(data) {
+    client.broadcast.emit('game event', data);
   });
 });
