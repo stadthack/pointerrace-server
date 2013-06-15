@@ -145,7 +145,7 @@ io.sockets.on('connection', function onConnection(client) {
         }
       }
     } else {
-      client.broadcast.emit('game event', data);
+      io.sockets.emit('game event', data);
     }
   });
 });
