@@ -14,6 +14,7 @@ var game = {
   playerCount: 0,
   playersInGoal: {},
   playersInStart: {},
+  numLevel: 0
 };
 
 var gameLoop = {
@@ -115,6 +116,7 @@ io.sockets.on('connection', function onConnection(client) {
   client.emit('connected', {
     id: client.id,
     players: _.invoke(otherPlayers, 'serialize'),
+    numLevel: game.numLevel
   });
   player.state.connect();
 
