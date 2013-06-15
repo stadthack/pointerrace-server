@@ -14,7 +14,13 @@ var game = {
   playerCount: 0,
   playersInGoal: {},
   playersInStart: {},
-  numLevel: 0
+  numLevel: 0,
+
+  resetLevel: function resetLevel() {
+    this.playersInGoal = {};
+    this.playersInStart = {};
+    this.numLevel += 1;
+  }
 };
 
 var gameLoop = {
@@ -141,6 +147,17 @@ io.sockets.on('connection', function onConnection(client) {
     });
   }
 
+  function loadNextLevel() {
+    game.resetLevel();
+    _.each(players, function (player) {
+      io.sockets.emit('game event', {
+        eventName: 'loadNextLevel',
+        args: { numLevel: game.numLevel },
+        playerId: player.id
+      });
+    });
+  }
+
   client.on('game event', function onGameEvent(data) {
     if (data.eventName === 'enterState') {
       if (data.args[0] === 'warmup') {
@@ -151,6 +168,13 @@ io.sockets.on('connection', function onConnection(client) {
         }
       } else if (data.args[0] === 'level') {
         sendLevelState();
+      } else if (data.args[0] === 'finish') {
+        game.playersInGoal[data.playerId] = true;
+
+        // At least all but one.
+        if (Object.keys(game.playersInStart).length >= (game.playerCount - 1)) {
+          loadNextLevel();
+        }
       }
     } else {
       io.sockets.emit('game event', data);
