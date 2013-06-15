@@ -131,20 +131,26 @@ io.sockets.on('connection', function onConnection(client) {
     player.y = data.y;
   });
 
+  function sendLevelState() {
+    _.each(players, function (player) {
+      io.sockets.emit('game event', {
+        eventName: 'enterState',
+        args: ['level'],
+        playerId: player.id
+      });
+    });
+  }
+
   client.on('game event', function onGameEvent(data) {
     if (data.eventName === 'enterState') {
       if (data.args[0] === 'warmup') {
         game.playersInStart[data.playerId] = true;
 
         if (Object.keys(game.playersInStart).length === game.playerCount) {
-          _.each(players, function (player) {
-            io.sockets.emit('game event', {
-              eventName: 'enterState',
-              args: ['level'],
-              playerId: player.id
-            });
-          });
+          sendLevelState();
         }
+      } else if (data.args[0] === 'level') {
+        sendLevelState();
       }
     } else {
       io.sockets.emit('game event', data);
