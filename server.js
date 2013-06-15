@@ -47,8 +47,6 @@ var gameLoop = {
     var currTime = Date.now();
     var timeToCall = Math.max(0, GAMELOOP_FREQUENCY -
                               (currTime - this._lastTime));
-    console.log('currTime', currTime);
-    console.log('timeToCall', timeToCall);
     this._lastTime = currTime + timeToCall;
     this._handle = setTimeout(this._loop.bind(this), timeToCall);
   },
@@ -74,6 +72,7 @@ PlayerState.prototype.onconnected = function onconnected() {
 PlayerState.prototype.ondisconnected = function ondisconnected() {
   delete players[this.player.id];
   console.log('player ' + this.player.id + ' disconnected and killed.');
+  io.sockets.emit('player disconnected', { player: this.player.serialize() });
 
   game.playerCount -= 1;
   gameLoop.check();
@@ -113,7 +112,7 @@ io.configure(function () {
 io.sockets.on('connection', function onConnection(client) {
   var player = players[client.id] = new Player(client.id);
 
-  client.emit('connected', { uuid: client.id });
+  client.emit('connected', { id: client.id });
   player.state.connect();
 
   client.on('disconnect', function onDisconnect() {
