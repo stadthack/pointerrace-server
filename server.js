@@ -1,7 +1,7 @@
 'use strict';
 
 var PORT = 8080;
-var GAMELOOP_FREQUENCY = 1 / 1;
+var GAMELOOP_FREQUENCY = 1000;
 
 var _ = require('underscore');
 var io = require('socket.io').listen(PORT);
@@ -15,8 +15,9 @@ var game = {
 };
 
 var gameLoop = {
-  _interval: 0,
+  _handle: 0,
   _previous: {},
+  _lastTime: 0,
 
   _loop: function _loop() {
     var state = {
@@ -28,23 +29,33 @@ var gameLoop = {
       io.sockets.emit('serverstate', state);
       this._previous = state;
     }
+
+    if (this._handle) {
+      this.start();
+    }
   },
 
   check: function check() {
-    if (game.playerCount > 0 && this._interval === 0) {
+    if (game.playerCount > 0 && this._handle === 0) {
       this.start();
-    } else if (game.playerCount === 0 && this._interval !== 0) {
+    } else if (game.playerCount === 0 && this._handle !== 0) {
       this.stop();
     }
   },
 
   start: function start() {
-    this._interval = setInterval(this._loop, GAMELOOP_FREQUENCY);
+    var currTime = Date.now();
+    var timeToCall = Math.max(0, GAMELOOP_FREQUENCY -
+                              (currTime - this._lastTime));
+    console.log('currTime', currTime);
+    console.log('timeToCall', timeToCall);
+    this._lastTime = currTime + timeToCall;
+    this._handle = setTimeout(this._loop.bind(this), timeToCall);
   },
 
   stop: function stop() {
-    clearInterval(this._interval);
-    this._interval = 0;
+    clearInterval(this._handle);
+    this._handle = 0;
   }
 };
 
