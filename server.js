@@ -102,11 +102,15 @@ StateMachine.create({
 function Player(id) {
   this.id = id;
   this.state = new PlayerState(this);
+  this.x = 0;
+  this.y = 0;
 }
 
 Player.prototype.serialize = function serialize() {
   return {
-    id: this.id
+    id: this.id,
+    x: this.x,
+    y: this.y
   };
 };
 
@@ -131,11 +135,6 @@ io.sockets.on('connection', function onConnection(client) {
   });
 
   client.broadcast.emit('player connected', player.serialize());
-
-  client.on('move', function onMove(data) {
-    player.x = data.x;
-    player.y = data.y;
-  });
 
   function sendLevelState() {
     _.each(players, function (player) {
@@ -181,6 +180,9 @@ io.sockets.on('connection', function onConnection(client) {
           loadNextLevel();
         }
       }
+    } else if (data.eventName === 'mouseMove') {
+      player.x = data.args[0];
+      player.y = data.args[1];
     } else {
       io.sockets.emit('game event', data);
     }
