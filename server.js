@@ -4,7 +4,7 @@ var PORT = 8080;
 var GAMELOOP_FREQUENCY = 45;
 
 var _ = require('underscore');
-var io = require('socket.io').listen(PORT);
+var io = require('socket.io').listen(PORT, '0.0.0.0');
 var StateMachine = require('sfsm');
 
 // Global player stats
