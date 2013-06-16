@@ -169,9 +169,10 @@ io.sockets.on('connection', function onConnection(client) {
       } else if (data.args[0] === 'level') {
         // player could want to come back to level to retry, send level only to him
         if (Object.keys(game.playersInStart).length === game.playerCount) {
-          console.log("loop-back level event to player");
           io.sockets.emit('game event', data);
         }
+      } else if (data.args[0] === 'retry') {
+        io.sockets.emit('game event', data);
       } else if (data.args[0] === 'finish') {
         game.playersInGoal[data.playerId] = true;
 
